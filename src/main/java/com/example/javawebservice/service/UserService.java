@@ -1,9 +1,11 @@
 package com.example.javawebservice.service;
 
-import com.example.javawebservice.dto.User;
+import com.example.javawebservice.dto.Post;
+import com.example.javawebservice.dto.ResponseUser;
+import com.example.javawebservice.enteties.AppUser;
+import com.example.javawebservice.repo.AppUserRepo;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -11,35 +13,46 @@ import java.util.List;
 public class UserService {
 
     private final WebClient webClient;
+    private AppUserRepo appUserRepo;
 
-    public UserService(WebClient webClient) {
+    public UserService(WebClient webClient, AppUserRepo appUserRepo) {
         this.webClient = webClient;
+        this.appUserRepo = appUserRepo;
     }
 
-    public List<User> getAllUsers() {
-       return webClient
-               .get()
-               .uri("users/")
-               .exchangeToFlux(clientResponse -> clientResponse.bodyToFlux(User.class))
-               .buffer()
-               .blockLast();
+
+    public ResponseUser getUser(int id) {
+        AppUser appUser = appUserRepo.getReferenceById(id);
+        return new ResponseUser(appUser.getId(), appUser.getUsername());
     }
 
-    public User getUser(int id) {
-        return webClient
-                .get()
-                .uri("users/" + id)
-                .exchangeToMono(clientResponse -> clientResponse.bodyToMono(User.class))
-                .block();
+    public ResponseUser addAppUser(AppUser appUser) {
+        AppUser newAppUser = new AppUser(appUser.getUsername(), appUser.getPassword());
+        appUserRepo.save(newAppUser);
+        return new ResponseUser(newAppUser.getId(), newAppUser.getUsername());
     }
 
-    public User addUser(User user) {
+    public ResponseUser updateAppUser(AppUser newAppUser, int id) {
+        AppUser existingAppUser = appUserRepo.getReferenceById(id);
 
-        return webClient
-                .post()
-                .uri("users/")
-                .body(Mono.just(user),User.class)
-                .exchangeToMono(clientResponse -> clientResponse.bodyToMono(User.class))
-                .block();
+        if(newAppUser.getUsername() != null){
+            existingAppUser.setUsername(newAppUser.getUsername());
+        }
+        if (newAppUser.getPassword() != null){
+            existingAppUser.setPassword(newAppUser.getPassword());
+        }
+        return new ResponseUser(existingAppUser.getId(), existingAppUser.getUsername());
+    }
+
+    public void terminateAppUser(int id) {
+        appUserRepo.deleteById(id);
+    }
+
+    public List<Post> getAllPostsByUser(int id) {
+        return webClient.get()
+                .uri("users/" + id + "/posts")
+                .exchangeToFlux(clientResponse -> clientResponse.bodyToFlux(Post.class))
+                .buffer()
+                .blockLast();
     }
 }
