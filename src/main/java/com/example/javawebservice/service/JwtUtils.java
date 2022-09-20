@@ -1,5 +1,6 @@
 package com.example.javawebservice.service;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Service;
@@ -29,5 +30,9 @@ public class JwtUtils {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public Claims parseBody(String token){
+        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
 }
