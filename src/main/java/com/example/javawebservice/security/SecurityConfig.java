@@ -1,7 +1,10 @@
 package com.example.javawebservice.security;
 
+import com.example.javawebservice.enteties.Role;
+import com.example.javawebservice.service.AuthService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -14,16 +17,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 //Klass för att konfigurera hur spring security funkar
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig {
 
-    private UserDetailsService userDetailsService;
-    private JwtRequestFilter jwtRequestFilter;
+    private final UserDetailsService userDetailsService;
+    private final JwtRequestFilter jwtRequestFilter;
+    private final AuthService authService;
 
 
-    public SecurityConfig(UserDetailsService userDetailsService, JwtRequestFilter jwtRequestFilter){
+    public SecurityConfig(UserDetailsService userDetailsService, JwtRequestFilter jwtRequestFilter, AuthService authService){
      this.userDetailsService = userDetailsService;
      this.jwtRequestFilter = jwtRequestFilter;
-
+     this.authService = authService;
     }
 
     @Bean
@@ -37,6 +42,9 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeRequests(auth -> auth
                         .antMatchers("/api/auth/**").permitAll()
+                        .antMatchers("/api/users/**/posts").hasRole(Role.ADMIN.toString())
+                        .antMatchers("/api/appusers/{id}").access("@authService.isCorrectUserLogin(#id)")
+                        .antMatchers("/api/appusers/{id}").hasRole(Role.ADMIN.toString())
                         .anyRequest().authenticated())
                 .userDetailsService(userDetailsService)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

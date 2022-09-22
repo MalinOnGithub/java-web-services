@@ -23,12 +23,10 @@ public class UserDetailsServiceImpl implements UserDetailsService { //Skapa serv
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        AppUser appuser = appUserRepo.findAppUserByUsername(username).orElseThrow();
-        return User.builder()
-                .username(appuser.getUsername())
-                .password(appuser.getPassword())
-                .authorities(new SimpleGrantedAuthority("ADMIN_ROLE"))
-                .build();
+
+        return appUserRepo
+                .findAppUserByUsername(username)
+                .orElseThrow();
     }
 }
 //Man skall kunna implementera Userdetails i Appuser? Så kan man returnera en appUser ist för User. ?

@@ -3,6 +3,7 @@ package com.example.javawebservice.service;
 import com.example.javawebservice.dto.Post;
 import com.example.javawebservice.dto.ResponseUser;
 import com.example.javawebservice.enteties.AppUser;
+import com.example.javawebservice.enteties.Role;
 import com.example.javawebservice.repo.AppUserRepo;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -13,7 +14,7 @@ import java.util.List;
 public class UserService {
 
     private final WebClient webClient;
-    private AppUserRepo appUserRepo;
+    private final AppUserRepo appUserRepo;
 
     public UserService(WebClient webClient, AppUserRepo appUserRepo) {
         this.webClient = webClient;
@@ -27,7 +28,7 @@ public class UserService {
     }
 
     public ResponseUser addAppUser(AppUser appUser) {
-        AppUser newAppUser = new AppUser(appUser.getUsername(), appUser.getPassword());
+        AppUser newAppUser = new AppUser(appUser.getUsername(), appUser.getPassword(), List.of(Role.USER));
         appUserRepo.save(newAppUser);
         return new ResponseUser(newAppUser.getId(), newAppUser.getUsername());
     }
