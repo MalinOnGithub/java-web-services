@@ -4,8 +4,10 @@ import com.example.javawebservice.dto.Post;
 import com.example.javawebservice.dto.ResponseUser;
 import com.example.javawebservice.enteties.AppUser;
 import com.example.javawebservice.service.UserService;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -18,6 +20,7 @@ public class UserController {
         this.userService = userService;
     }
     @GetMapping("{id}")
+    @PreAuthorize("@authService.isCorrectUserLogin(#id)")
     public ResponseUser getUser(@PathVariable int id){
         return userService.getUser(id);
     }

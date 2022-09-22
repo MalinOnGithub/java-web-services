@@ -28,9 +28,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
+        //Vi hämtar värdet från Authorization från Headern som vi får in i requesten
         String authHeader = request.getHeader("Authorization");
-
+        /*Om värdet inte är null så plockar vi ut token där vi tar bort "Bearer". Vi jämför nycklarna så dom matchar.
+        * Bodyn som vi fick från token hämtar vi ut ett username från. Baserat på username så hämtar vi ut en User från
+        * repot. Ger Usern/Användaren en token att man är autentiserad.*/
         if (authHeader != null){
             String token = authHeader.substring(7);
             Claims body = jwtUtils.parseBody(token);
@@ -38,13 +40,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             UserDetails user = userDetailsService.loadUserByUsername(username);
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                    new UsernamePasswordAuthenticationToken(user, null, null);
+                    new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 
             usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
+            //Sätter personen som är inloggad
             SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
         }
-
+        //Fortsätter filterflödet
         filterChain.doFilter(request, response);
     }
 }
