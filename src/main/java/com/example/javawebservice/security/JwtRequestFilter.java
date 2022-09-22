@@ -18,16 +18,14 @@ import java.io.IOException;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
-
-    private JwtUtils jwtUtils;
-    private UserDetailsService userDetailsService;
-
+    private final JwtUtils jwtUtils;
+    private final UserDetailsService userDetailsService;
     public JwtRequestFilter(JwtUtils jwtUtils, UserDetailsService userDetailsService) {
         this.jwtUtils = jwtUtils;
         this.userDetailsService = userDetailsService;
     }
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         //Vi hämtar värdet från Authorization från Headern som vi får in i requesten
         String authHeader = request.getHeader("Authorization");
         /*Om värdet inte är null så plockar vi ut token där vi tar bort "Bearer". Vi jämför nycklarna så dom matchar.

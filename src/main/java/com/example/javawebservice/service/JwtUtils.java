@@ -4,16 +4,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.stereotype.Service;
-
 import java.util.Date;
-
 @Service
 public class JwtUtils {
-
-    private final int EXPERATION_MILLIS = 1000 * 60;
-
+    private final int EXPERATION_MILLIS = 1000 * 600;
     private String secret = "hemlighet";
-
     public String generateToken(String username){
        return Jwts.builder()
                 .setSubject(username)
@@ -21,7 +16,6 @@ public class JwtUtils {
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }
-
     public Boolean validate(String token) {
         try {
             Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
@@ -31,7 +25,6 @@ public class JwtUtils {
             return false;
         }
     }
-
     public Claims parseBody(String token){
         return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
     }
